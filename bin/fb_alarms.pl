@@ -55,7 +55,6 @@ for my $device ( $response->@* ) {
     }
 
     # say $json->encode($device);
-
     # say $json->encode($config);
 }
 
@@ -171,4 +170,61 @@ sub get_token () {
     }
     exit;
 }
+
+=head1 NAME
+
+fb_alarms.pl - add an alarm to your FitBit
+
+=head1 SYNOPSIS
+
+    fb_alarms.pl 
+    fb_alarms.pl -j
+    fb_alarms.pl -h
+    fb_alarms.pl -m
+    fb_alarms.pl -t (24-hour time)+|-(timezone offset) ][-r]
+                 [-d (name of day|weekdays|weekends|all)]
+
+=head1 DESCRIPTION
+
+This program creates a QR Code from the message specified
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-j>, B<--json>
+
+Display output of current state of alarms in JSON
+
+=item B<-t>, B<--time>
+
+The time the alert should occur, in the form I<HH:MMTimezoneOffset>, so 
+for Noon in Indianapolis during winter, it would be I<12:00-05:00>. 
+
+=item B<-r>, B<--recurring>
+
+Run this task more than once. requires B<-d>
+
+=item B<-d>, B<--days>
+
+Lists the days the alarm will be set for. Takes the full name of the day
+(i.e., "monday", not "mon") or "weekdays", "weekends" or "all". Required for
+
+=item B<-m>, B<--manual>
+=item B<-h>, B<--help>
+
+Shows the documentation, in either extended or abbreviated form
+
+=back
+
+=head1 LICENSE
+
+This is released under the Artistic 
+License. See L<perlartistic>.
+
+=head1 AUTHOR
+
+Dave Jacoby L<jacoby.david@gmail.com>
+
+=cut
 
