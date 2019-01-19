@@ -22,27 +22,48 @@ use Pushover;
 my $json = JSON->new->pretty->canonical;
 my $mojo = Mojo::UserAgent->new;
 
-my $config   = config();
-my $token    = get_token();
+my $config = config();
+my $token  = get_token();
 
-my $day = DateTime->now()->set_time_zone('America/New_York');
+my $now = DateTime->now()->set_time_zone('America/New_York');
+my $day = DateTime->new(
+    year   => 2016,
+    month  => 12,
+    day    => 27,
+    hour   => 12,
+    minute => 0,
+    second => 0,
+)->set_time_zone('America/New_York');
 my $days = {};
 
-for ( 00 .. 20 ) {
-    $day->subtract(days=>1);
-    my $date =  $day->ymd;
-    say $date;
-    my $sleep = get_sleep($token,$date);
-    $days->{$date} = $sleep->{summary};
-    say $json->encode($days);
+while ( $day < $now ) {
+    state $c = 1;
+    $day->add( days => 1 );
+    my $date = $day->ymd;
+    # say join "\t", $c, $date;
+    $c++;
+    my $sleep = get_sleep( $token, $date );
+    $days->{$date} = $sleep;
+    # say $json->encode( $sleep->{summary} );
+    # last if $sleep->{summary}{totalMinutesAsleep} > 0;
     sleep 30;
 }
 
-if ( open my $fh ,'>', 'sleep.json') {
+# start counting december 27, 2016 and add a day at a time
+
+# for ( 00 .. 20 ) {
+#     $day->subtract(days=>1);
+#     my $date =  $day->ymd;
+#     say $date;
+#     my $sleep = get_sleep($token,$date);
+#     $days->{$date} = $sleep->{summary};
+#     say $json->encode($days);
+#     sleep 30;
+# }
+
+if ( open my $fh, '>', 'sleep.json' ) {
     say $fh $json->encode($days);
 }
-
-
 
 # my @days ;
 # push @days, get_sleep( $token) ;
@@ -53,22 +74,25 @@ exit;
 
 exit;
 
-sub get_sleep ( $token , $date='' ) {
+sub get_sleep ( $token, $date = '' ) {
     if ( $date eq '' ) {
         $date = DateTime->now()->set_time_zone('floating')->ymd;
     }
     my $server = 'https://api.fitbit.com';
-    my $url = join '/', $server, 1.2, 'user', '-', 
-        'sleep', 'date',$date . '.json';
-    say $date;
-    say $url;
+    my $url = join '/', $server, 1.2, 'user', '-',
+        'sleep', 'date', $date . '.json';
+
+    # say $date;
+    # say $url;
     my $res =
         $mojo->get( $url, { 'Authorization' => "Bearer $token", } )->result;
     if ( $res->is_success ) {
         my $obj = $json->decode( $res->body );
-        say $json->encode($obj);
+
+        # say $json->encode($obj);
         return $obj;
-    } else {
+    }
+    else {
         say STDERR $res->code;
     }
 }
